@@ -51,7 +51,7 @@ async function run() {
 
     app.get("/recommendations/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(typeof id, id);
+      // console.log(typeof id, id);
       const query = { queryId: id };
       const result = await recommendations.find(query).toArray();
       res.send(result);
@@ -68,6 +68,14 @@ async function run() {
       const recommendation = req.body;
       // console.log(recommendation);
       const result = await recommendations.insertOne(recommendation);
+      res.send(result);
+    });
+
+    app.patch("/queries/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = { $set: req.body };
+      const result = await queries.updateOne(filter, updatedDoc);
       res.send(result);
     });
 

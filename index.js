@@ -49,23 +49,31 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/recommendations/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(typeof id, id);
+      const query = { queryId: id };
+      const result = await recommendations.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/queries", async (req, res) => {
       const query = req.body;
-      console.log(query);
+      // console.log(query);
       const result = await queries.insertOne(query);
       res.send(result);
     });
 
     app.post("/recommendations", async (req, res) => {
       const recommendation = req.body;
-      console.log(recommendation);
+      // console.log(recommendation);
       const result = await recommendations.insertOne(recommendation);
       res.send(result);
     });
 
     app.patch("/queries/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+      // console.log(id);
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = { $inc: { recommendationCount: +1 } };
       const result = await queries.updateOne(filter, updatedDoc);

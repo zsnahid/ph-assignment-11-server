@@ -37,6 +37,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/queries/filter", async (req, res) => {
+      const email = req.query.email;
+      const query = { userEmail: email };
+      const result = await queries.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/recommendations", async (req, res) => {
       const result = await recommendations.find().toArray();
       res.send(result);
@@ -44,6 +51,7 @@ async function run() {
 
     app.get("/queries/:id", async (req, res) => {
       const id = req.params.id;
+      console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await queries.findOne(query);
       res.send(result);
@@ -85,6 +93,12 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = { $inc: { recommendationCount: +1 } };
       const result = await queries.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    app.delete("/queries/:id", async (req, res) => {
+      const query = { _id: new ObjectId(req.params.id) };
+      const result = await queries.deleteOne(query);
       res.send(result);
     });
   } finally {

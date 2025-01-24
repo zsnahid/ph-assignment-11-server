@@ -49,6 +49,20 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/recommendations/questioner/filter", async (req, res) => {
+      const email = req.query.email;
+      const query = { questionerEmail: email };
+      const result = await recommendations.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/recommendations/recommender/filter", async (req, res) => {
+      const email = req.query.email;
+      const query = { recommenderEmail: email };
+      const result = await recommendations.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/queries/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
@@ -87,7 +101,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/queries/:id", async (req, res) => {
+    app.patch("/queries/increment/:id", async (req, res) => {
       const id = req.params.id;
       // console.log(id);
       const filter = { _id: new ObjectId(id) };
@@ -96,9 +110,23 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/queries/decrement/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = { $inc: { recommendationCount: -1 } };
+      const result = await queries.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
     app.delete("/queries/:id", async (req, res) => {
       const query = { _id: new ObjectId(req.params.id) };
       const result = await queries.deleteOne(query);
+      res.send(result);
+    });
+
+    app.delete("/recommendations/delete/:id", async (req, res) => {
+      const query = { _id: new ObjectId(req.params.id) };
+      const result = await recommendations.deleteOne(query);
       res.send(result);
     });
   } finally {

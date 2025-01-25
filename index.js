@@ -44,6 +44,14 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/queries/search", async (req, res) => {
+      const product = req.query.product;
+      const regex = new RegExp(product, "i");
+      const query = { productName: regex };
+      const result = await queries.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/recommendations", async (req, res) => {
       const result = await recommendations.find().toArray();
       res.send(result);

@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.port || 3000;
@@ -16,6 +18,7 @@ const client = new MongoClient(uri, {
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (req, res) => res.send("Better Buy Server"));
 

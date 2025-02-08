@@ -46,9 +46,18 @@ async function run() {
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "5h",
       });
-      console.log("token created");
       res
         .cookie("token", token, {
+          httpOnly: true,
+          secure: false,
+        })
+        .send({ success: true });
+    });
+
+    //clear cookie
+    app.post("/logout", (req, res) => {
+      res
+        .clearCookie("token", {
           httpOnly: true,
           secure: false,
         })

@@ -25,6 +25,22 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+const verifyToken = (req, res, next) => {
+  const token = req.cookies?.token;
+  console.log("token inside verifyToken", token);
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      res.status(401).send({ message: "unauthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
+
 app.get("/", (req, res) => res.send("Better Buy Server"));
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
@@ -69,8 +85,13 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/queries/filter", async (req, res) => {
+    app.get("/queries/filter", verifyToken, async (req, res) => {
       const email = req.query.email;
+
+      if (req.user.email !== email) {
+        return res.status(403).send({ message: "forbidden" });
+      }
+
       const query = { userEmail: email };
       const result = await queries.find(query).toArray();
       res.send(result);
@@ -89,19 +110,37 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/recommendations/questioner/filter", async (req, res) => {
-      const email = req.query.email;
-      const query = { questionerEmail: email };
-      const result = await recommendations.find(query).toArray();
-      res.send(result);
-    });
+    app.get(
+      "/recommendations/questioner/filter",
+      verifyToken,
+      async (req, res) => {
+        const email = req.query.email;
 
-    app.get("/recommendations/recommender/filter", async (req, res) => {
-      const email = req.query.email;
-      const query = { recommenderEmail: email };
-      const result = await recommendations.find(query).toArray();
-      res.send(result);
-    });
+        if (req.user.email !== email) {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+
+        const query = { questionerEmail: email };
+        const result = await recommendations.find(query).toArray();
+        res.send(result);
+      }
+    );
+
+    app.get(
+      "/recommendations/recommender/filter",
+      verifyToken,
+      async (req, res) => {
+        const email = req.query.email;
+
+        if (req.user.email !== email) {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+
+        const query = { recommenderEmail: email };
+        const result = await recommendations.find(query).toArray();
+        res.send(result);
+      }
+    );
 
     app.get("/queries/:id", async (req, res) => {
       const id = req.params.id;

@@ -85,6 +85,11 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/queries/latest", async (req, res) => {
+      const result = await queries.find().sort({ _id: -1 }).limit(6).toArray();
+      res.send(result);
+    });
+
     app.get("/queries/filter", verifyToken, async (req, res) => {
       const email = req.query.email;
 
@@ -100,7 +105,10 @@ async function run() {
     app.get("/queries/search", async (req, res) => {
       const product = req.query.product;
       const regex = new RegExp(product, "i");
-      const query = { productName: regex };
+      // const query = { productName: regex };
+      const query = {
+        $or: [{ question: regex }, { productName: regex }],
+      };
       const result = await queries.find(query).toArray();
       res.send(result);
     });

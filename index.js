@@ -18,7 +18,11 @@ const client = new MongoClient(uri, {
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://ph-assignment-11-94a71.web.app",
+      "https://ph-assignment-11-94a71.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -27,7 +31,7 @@ app.use(cookieParser());
 
 const verifyToken = (req, res, next) => {
   const token = req.cookies?.token;
-  console.log("token inside verifyToken", token);
+  // console.log("token inside verifyToken", token);
   if (!token) {
     return res.status(401).send({ message: "unauthorized access" });
   }
@@ -43,14 +47,14 @@ const verifyToken = (req, res, next) => {
 
 app.get("/", (req, res) => res.send("Better Buy Server"));
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port);
 
 async function run() {
   try {
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
 
     const database = client.db("assignment11db");
     const queries = database.collection("queries");
@@ -65,7 +69,8 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
         .send({ success: true });
     });
@@ -75,7 +80,8 @@ async function run() {
       res
         .clearCookie("token", {
           httpOnly: true,
-          secure: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
         .send({ success: true });
     });
@@ -152,7 +158,7 @@ async function run() {
 
     app.get("/queries/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+      // console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await queries.findOne(query);
       res.send(result);

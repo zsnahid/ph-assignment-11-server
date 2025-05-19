@@ -45,7 +45,7 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-app.get("/", (req, res) => res.send("Better Buy Server"));
+app.get("/", (req, res) => res.send("Qrius Server"));
 
 app.listen(port);
 
@@ -168,7 +168,10 @@ async function run() {
       const id = req.params.id;
       // console.log(typeof id, id);
       const query = { queryId: id };
-      const result = await recommendations.find(query).toArray();
+      const result = await recommendations
+        .find(query)
+        .sort({ createdAt: -1 })
+        .toArray();
       res.send(result);
     });
 
@@ -180,10 +183,11 @@ async function run() {
     });
 
     app.post("/recommendations", async (req, res) => {
-      const recommendation = req.body;
-      // console.log(recommendation);
-      const result = await recommendations.insertOne(recommendation);
-      res.send(result);
+      const newRecommendation = { ...req.body, createdAt: new Date() };
+
+      const result = await recommendations.insertOne(newRecommendation);
+
+      res.status(201).send(result);
     });
 
     app.patch("/queries/update/:id", async (req, res) => {
